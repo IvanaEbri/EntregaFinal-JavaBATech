@@ -66,8 +66,6 @@ La API REST permite:
 * Cálculo automático del total
 * Confirmación del pedido
 * Descuento automático de stock
-
-### Ver si se suma
 * Manejo de estados del pedido:
 
     * pendiente
