@@ -62,7 +62,7 @@ public class CategoryService {
         // se puede usar el siguiente codigo, pero hay que manejar una excepcion(OptimisticLockingFailureException)
         //this.repository.deleteById(category);
 
-        System.out.println("Se borro correctamente el categoria con id: " + category.getCategoryName());
+        System.out.println("Se borro correctamente el categoria: " + category.getCategoryName());
         return category;
     }
 }

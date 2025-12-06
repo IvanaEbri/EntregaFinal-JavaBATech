@@ -7,30 +7,30 @@ import java.util.List;
 @RestController
 @RequestMapping("/category")
 public class CategoryController {
-    private CategoryService service;
+    private CategoryService categoryService;
 
-    public CategoryController(CategoryService service) {
+    public CategoryController(CategoryService categoryService) {
 
-        this.service = service;
+        this.categoryService = categoryService;
     }
 
     @PostMapping
     public Category createCategory(@RequestBody Category category) {
 
-        return this.service.createCategory(category);
+        return this.categoryService.createCategory(category);
     }
 
-    // GET /products?category="categoria"
+    // GET /category?category="categoria"
     @GetMapping
     public List<Category> showCategorys(
             @RequestParam(required = false, defaultValue = "") String category){
-        return this.service.showCategorys(category);
+        return this.categoryService.showCategorys(category);
     }
 
     //@PatchMapping
     @PutMapping("/{id}")
     public Category editCategory(@PathVariable Long id, @RequestBody Category category) {
-        return this.service.editCategoryName(id, category);
+        return this.categoryService.editCategoryName(id, category);
     }
 
     /* no se deberia poder borrar completamente una categoria

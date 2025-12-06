@@ -10,10 +10,16 @@ public interface BookRepository extends JpaRepository<Book,Long> {
     //querys personalizadas
 
     // TODO: query methods: https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html
-    List<Book> findByTitleContaining(String title);
+    List<Book> findByTitleContainingAndActiveTrue(String title);
 
-    List<Book> findByAuthorContaining (String author);
-    List<Book> findByCategory (Category category);
+    List<Book> findByAuthorContainingAndActiveTrue (String author);
 
-    // List<Product> findById (Integer id);
+    // Busca libros donde el campo 'category' tenga un 'categoryName' específico
+    List<Book> findByActiveTrueAndCategory_CategoryName(String categoryName);
+
+    List<Book> findByActiveTrueAndCategory_CategoryId(Long categoryId);
+
+    List<Book> findByActiveTrue ();
+
+    // List<Book> findById (Integer id);
 }
