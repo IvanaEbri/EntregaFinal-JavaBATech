@@ -18,6 +18,7 @@ public class OrderLine {
     @ManyToOne
     private Book book;
     private Integer quantity;
+    private Double valueLine;
 
     @ManyToOne
     private Order order;
@@ -26,5 +27,6 @@ public class OrderLine {
         this.book = book;
         this.quantity = quantity;
         this.order = order;
+        this.valueLine = book.getPrice()*quantity;
     }
 }

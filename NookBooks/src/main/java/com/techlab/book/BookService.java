@@ -1,6 +1,5 @@
 package com.techlab.book;
 
-import jakarta.persistence.ManyToOne;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -54,6 +53,14 @@ public class BookService {
         return this.bookRepository.findByActiveTrue();
     }
 
+    public Optional<Book> showBook (Long bookId){
+        Optional<Book> bookOptional = this.bookRepository.findById(bookId);
+        if (!bookOptional.isEmpty()) {
+            return bookOptional;
+        }
+        return null;
+    }
+
     public List<Book> showBookByCategory (Long category){
         if (category != null){
             return this.bookRepository.findByActiveTrueAndCategory_CategoryId(category);
@@ -105,6 +112,38 @@ public class BookService {
         this.bookRepository.save(book);
 
         System.out.println("Se borro correctamente el libro: " + book.getTitle() + " - " + book.getAuthor());
+        return book;
+    }
+
+    public Book removeStock (Long id, Integer quantity){
+        Optional<Book> bookOptional = this.bookRepository.findById(id);
+        if (bookOptional.isEmpty()) {
+            System.out.println("No se encuentra el libro. No se podrá modificar el stock");
+            return null;
+        }
+
+        Book book = bookOptional.get();
+        book.setStock(book.getStock()-quantity);
+
+        this.bookRepository.save(book);
+
+        System.out.println("Se modificó correctamente el stock del libro: " + book.getTitle() + " - " + book.getAuthor()+ ", stock actual: " +book.getStock());
+        return book;
+    }
+
+    public Book addStock (Long id, Integer quantity){
+        Optional<Book> bookOptional = this.bookRepository.findById(id);
+        if (bookOptional.isEmpty()) {
+            System.out.println("No se encuentra el libro. No se podrá modificar el stock");
+            return null;
+        }
+
+        Book book = bookOptional.get();
+        book.setStock(book.getStock()+quantity);
+
+        this.bookRepository.save(book);
+
+        System.out.println("Se modificó correctamente el stock del libro: " + book.getTitle() + " - " + book.getAuthor()+ ", stock actual: " +book.getStock());
         return book;
     }
 

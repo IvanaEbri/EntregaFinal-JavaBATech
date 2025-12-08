@@ -19,8 +19,8 @@ public class Order {
     private Double totalPrice;
     private Integer state;  // TODO: 0-pendiente, 1-confirmado, 2-enviado, 3-entregado, 4-cancelado
 
-    public Order(Client client) {
-        this.client = client;
+    public Order() {
+        //this.client = client; pendiente sin asignar cliente, al asignarlo se confirmará
         this.totalPrice = Double.valueOf(0);
         this.state = 0;
     }
