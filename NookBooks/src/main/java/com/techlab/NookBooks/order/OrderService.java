@@ -1,9 +1,9 @@
-package com.techlab.order;
-import com.techlab.book.Book;
-import com.techlab.book.BookService;
-import com.techlab.client.Client;
-import com.techlab.client.ClientService;
-import com.techlab.exception.ExceptionStockInsuficiente;
+package com.techlab.NookBooks.order;
+import com.techlab.NookBooks.book.Book;
+import com.techlab.NookBooks.book.BookService;
+import com.techlab.NookBooks.client.Client;
+import com.techlab.NookBooks.client.ClientService;
+import com.techlab.NookBooks.exception.ExceptionStockInsuficiente;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,89 +25,81 @@ public class OrderService {
         this.bookService = bookService;
     }
 
-    public Order createOrder (Order order){
-        return this.orderRepository1.save(order);
+    public PurchaseOrder createOrder (PurchaseOrder purchaseOrder){
+        return this.orderRepository1.save(purchaseOrder);
     }
 
-    public OrderLine createOrderLine (OrderLine orderLine){
-        Order order;
-        try {
-            order = (Order) orderLine.getOrder();
-            //si no hay una orden creada se deberá crear
-        } catch (Exception e){
-            order = new Order();
-            createOrder(order);
+    public OrderLine createOrderLine (OrderLineDTO dto){
+        PurchaseOrder order = null;
+
+        if (dto.getOrderId() != null) {
+            order = orderRepository1.findById(dto.getOrderId())
+                    .orElseThrow(() -> new RuntimeException("La orden no existe"));
+        } else {
+            order = new PurchaseOrder();
+            order.setState(0);
+            orderRepository1.save(order);
         }
 
-        if(order.getState() !=0){
-            System.out.println("No se pueden agregar mas items al pedido n "+ order.getId() + " de "+ order.getClient().getClientName());
-            return null;
-        }
-        if (!this.checkStock(orderLine.getBook(),orderLine.getQuantity())){
-            System.out.println("No se hay suficiente stock del libro "+ orderLine.getBook().getTitle() + " de "+ orderLine.getBook().getAuthor());
-            return null;
-        }
-        if (!orderLine.getBook().getActive()){
-            System.out.println("El libro que desea ingeresar ha sido eliminado");
-            return null;
-        }
-        //al crear la linea no se deberia restar del stock inmediatamente
-/*        try {
-            orderLine.getBook().setStock(orderLine.getBook().getStock()- orderLine.getQuantity());
-            order.setTotalPrice(order.getTotalPrice()+orderLine.getValueLine());
-            return this.orderLineRepository.save(orderLine);
+        Book book = bookService.searchBook(dto.getBookId());
 
-        } catch (Exception e){
-            System.out.println("Ha ocurrido un error al crear el pedido del libro");
-            return null;
+        if (book.getStock() < dto.getQuantity()) {
+            throw new IllegalArgumentException("Stock insuficiente");
         }
- */
-        return this.orderLineRepository.save(orderLine);
+
+        double valueLine = book.getPrice() * dto.getQuantity();
+
+        OrderLine line = new OrderLine();
+        line.setOrder(order);
+        line.setBook(book);
+        line.setQuantity(dto.getQuantity());
+        line.setValueLine(valueLine);
+
+        return orderLineRepository.save(line);
     }
 
-    public List<Order> showOrders(Long clientId){
+    public List<PurchaseOrder> showOrders(Long clientId){
         if (clientId != null){
-            return this.orderRepository1.findByClient_ClientId(clientId);
+            return this.orderRepository1.findByClient_Id(clientId);
         }
         return this.orderRepository1.findAll();
         //hasta aca trae todas las ordenes pero no las lineas dentro de cada una, para ello se debe iongresar a la orden para verla
     }
 
     public List<OrderLine> showOrden (Long orderId){
-        if (orderId == null){
-            System.out.println("No ha seleccionado un pedido para mostrar");
-            return null;
+        if (orderId == null) {
+            throw new IllegalArgumentException("Debe seleccionar un pedido válido.");
         }
-        try {
-            return this.orderLineRepository.findByOrder_OrderId(orderId);
-        }catch (Exception e){
-            System.out.println("El pedido seleccionado no es valido");
-            return null;
-        }
+
+        // Validar que la orden exista
+        orderRepository1.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("El pedido no existe."));
+
+        return orderLineRepository.findByPurchaseOrder_Id(orderId);
         //aca se verian las lineas del pedido
     }
 
-    public Order editOrder (Long id, Order dataOrder){
-        Order order = this.orderRepository1.findById(id)
+    public PurchaseOrder editOrder (Long id, PurchaseOrder dataPurchaseOrder){
+        PurchaseOrder purchaseOrder = this.orderRepository1.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontro el pedido"));
-        if (dataOrder.getClient() == null){
+        if (dataPurchaseOrder.getClient() == null){
             System.out.println("No se puede editar el pedido. Debe ingresar un cliente valido.");
             return null;
         }
 
-        if (order.getState() != 0){
+        if (purchaseOrder.getState() != 0){
             System.out.println("No se puede editar un pedido luego de confirmado.");
         }
-        order.setClient(dataOrder.getClient());
-        return this.orderRepository1.save(order);
+        purchaseOrder.setClient(dataPurchaseOrder.getClient());
+        return this.orderRepository1.save(purchaseOrder);
     }
 
     public OrderLine editOrderLine (Long id, OrderLine dataOrderLine){
         OrderLine orderLine = this.orderLineRepository.findById(id).orElseThrow(() -> new RuntimeException("No se encontro la linea de pedido"));
 
-        Order order = (Order) orderLine.getOrder();
+        PurchaseOrder purchaseOrder = (PurchaseOrder) orderLine.getOrder();
 
-        if (order.getState() != 0){
+        if (purchaseOrder.getState() != 0){
             System.out.println("No se puede editar un pedido confirmado");
             return null;
         }
@@ -152,11 +144,11 @@ public class OrderService {
             return null;
         }
          */
-        order.setTotalPrice(order.getTotalPrice()-orderLine.getValueLine()+ dataOrderLine.getValueLine());
+        purchaseOrder.setTotalPrice(purchaseOrder.getTotalPrice()-orderLine.getValueLine()+ dataOrderLine.getValueLine());
         orderLine.setBook(dataOrderLine.getBook());
         orderLine.setQuantity(dataOrderLine.getQuantity());
         orderLine.setValueLine(dataOrderLine.getValueLine());
-        this.orderRepository1.save(order);
+        this.orderRepository1.save(purchaseOrder);
         return this.orderLineRepository.save(orderLine);
     }
 
@@ -199,7 +191,7 @@ public class OrderService {
      */
 
     private Boolean checkStock(Book book, Integer quantity){
-        Optional<Book> bookOptional = this.bookService.showBook(book.getId());
+        Optional<Book> bookOptional = Optional.ofNullable(this.bookService.searchBook(book.getId()));
         if (bookOptional.isEmpty()) {
             System.out.println("No se ha econtrado el libro.");
             return false;
@@ -214,12 +206,12 @@ public class OrderService {
     }
 
     @Transactional
-    public Order confirmOrder (Long id, Long clientId){
-        Order order = this.orderRepository1.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró el libro."));
+    public PurchaseOrder confirmOrder (Long id, Long clientId){
+        PurchaseOrder purchaseOrder = this.orderRepository1.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se encontró el el pedido."));
         Client client = this.clientService.searchClient(clientId);
 
-        List<OrderLine> orderLines= orderLineRepository.findByOrder_OrderId(order.getId());
+        List<OrderLine> orderLines= orderLineRepository.findByPurchaseOrder_Id(purchaseOrder.getId());
 
         for (OrderLine orderLine : orderLines){
             Boolean stock = this.checkStock(orderLine.getBook(),orderLine.getQuantity());
@@ -238,60 +230,60 @@ public class OrderService {
             i += orderLine1.getValueLine();
             bookService.removeStock(orderLine1.getId(), orderLine1.getQuantity());
         }
-        order.setTotalPrice(i);
-        order.setClient(client);
-        order.setState(1);
-        orderRepository1.save(order);
+        purchaseOrder.setTotalPrice(i);
+        purchaseOrder.setClient(client);
+        purchaseOrder.setState(1);
+        orderRepository1.save(purchaseOrder);
         System.out.println("Se ha confirmado el pedido");
-        return order;
+        return purchaseOrder;
     }
 
-    public Order sendOrder (Long id) {
-        Order order = this.orderRepository1.findById(id)
+    public PurchaseOrder sendOrder (Long id) {
+        PurchaseOrder purchaseOrder = this.orderRepository1.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontró el libro."));
-        order.setState(2);
-        orderRepository1.save(order);
+        purchaseOrder.setState(2);
+        orderRepository1.save(purchaseOrder);
         System.out.println("Se ha enviado el pedido");
-        return order;
+        return purchaseOrder;
     }
 
-    public Order deliverOrder (Long id) {
-        Order order = this.orderRepository1.findById(id)
+    public PurchaseOrder deliverOrder (Long id) {
+        PurchaseOrder purchaseOrder = this.orderRepository1.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontró el libro."));
-        order.setState(3);
-        orderRepository1.save(order);
+        purchaseOrder.setState(3);
+        orderRepository1.save(purchaseOrder);
         System.out.println("Se ha entregado el pedido");
-        return order;
+        return purchaseOrder;
     }
 
-    public Order deleteOrder (Long id) {
-        Order order = this.orderRepository1.findById(id)
+    public PurchaseOrder deleteOrder (Long id) {
+        PurchaseOrder purchaseOrder = this.orderRepository1.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontró el libro."));
-        if (order.getState()!= 0 && order.getState() != 4){
-            List<OrderLine> orderLines= orderLineRepository.findByOrder_OrderId(order.getId());
+        if (purchaseOrder.getState()!= 0 && purchaseOrder.getState() != 4){
+            List<OrderLine> orderLines= orderLineRepository.findByPurchaseOrder_Id(purchaseOrder.getId());
 
             for (OrderLine orderLine1 : orderLines) {
                 bookService.addStock(orderLine1.getId(), orderLine1.getQuantity());
             }
         }
-        order.setState(4);
-        orderRepository1.save(order);
+        purchaseOrder.setState(4);
+        orderRepository1.save(purchaseOrder);
         System.out.println("Se ha cancelado el pedido");
-        return order;
+        return purchaseOrder;
     }
 
     public OrderLine deleteOrderLine (Long id){
         OrderLine orderLine = this.orderLineRepository.findById(id).orElseThrow(() -> new RuntimeException("No se encontró el la línea de pedido."));
 
-        Order order = (Order) orderLine.getOrder();
+        PurchaseOrder purchaseOrder = (PurchaseOrder) orderLine.getOrder();
 
-        if (order.getState() != 0){
+        if (purchaseOrder.getState() != 0){
             System.out.println("No se pueden eliminar líneas de los pedidos confirmados.");
             return null;
         }
 
-        order.setTotalPrice(order.getTotalPrice()-orderLine.getValueLine());
-        orderRepository1.save(order);
+        purchaseOrder.setTotalPrice(purchaseOrder.getTotalPrice()-orderLine.getValueLine());
+        orderRepository1.save(purchaseOrder);
 
         orderLineRepository.delete(orderLine);
         System.out.println("Se ha eliminado la línea de pedido");

@@ -1,4 +1,4 @@
-package com.techlab.client;
+package com.techlab.NookBooks.client;
 
 import org.springframework.web.bind.annotation.*;
 

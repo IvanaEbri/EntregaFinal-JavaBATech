@@ -1,4 +1,4 @@
-package com.techlab.book;
+package com.techlab.NookBooks.book;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,7 +17,7 @@ public interface BookRepository extends JpaRepository<Book,Long> {
     // Busca libros donde el campo 'category' tenga un 'categoryName' específico
     List<Book> findByActiveTrueAndCategory_CategoryName(String categoryName);
 
-    List<Book> findByActiveTrueAndCategory_CategoryId(Long categoryId);
+    List<Book> findByActiveTrueAndCategory_Id(Long categoryId);
 
     List<Book> findByActiveTrue ();
 

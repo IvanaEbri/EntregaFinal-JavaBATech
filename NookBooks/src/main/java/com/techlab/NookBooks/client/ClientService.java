@@ -1,4 +1,4 @@
-package com.techlab.client;
+package com.techlab.NookBooks.client;
 
 import org.springframework.stereotype.Service;
 
@@ -14,22 +14,15 @@ public class ClientService {
     }
 
     public Client createClient (Client client){
-        if (client.getClientName().isEmpty()){
-            System.out.println("Debe ingresar un nombre valido para el cliente");
-            return null;
-        }
-        if (client.getAddress().isEmpty()){
-            System.out.println("Debe ingresar una direccion valida para el cliente");
-        }
-        this.clientRepository.save(client);
-        return client;
+        validateClient(client);
+        return clientRepository.save(client);
     }
 
     public List<Client> showClients (String clientName){
         if (!clientName.isEmpty()) {
             return this.clientRepository.findByActiveTrueAndClientNameContaining(clientName);
         }
-        return this.clientRepository.findAll();
+        return this.clientRepository.findByActiveTrue();
     }
 
     public Client searchClient (Long id){
@@ -38,16 +31,9 @@ public class ClientService {
     }
 
     public Client editClient (Long id, Client dataClient){
+        validateClient(dataClient);
         Client client = this.clientRepository.findByActiveTrueAndId(id)
                 .orElseThrow(() -> new RuntimeException("No se encontro el cliente"));
-
-        if (dataClient.getClientName().isEmpty()){
-            System.out.println("Debe ingresar un nombre valido para el cliente");
-            return null;
-        }
-        if (dataClient.getAddress().isEmpty()){
-            System.out.println("Debe ingresar una direccion valida para el cliente");
-        }
 
         client.setClientName(dataClient.getClientName());
         client.setAddress(dataClient.getAddress());
@@ -67,5 +53,20 @@ public class ClientService {
         client.setActive(Boolean.FALSE);
         this.clientRepository.save(client);
         return client;
+    }
+
+
+    // ----- VALIDADOR -----
+    private void validateClient(Client client) {
+        if (client == null) {
+            throw new IllegalArgumentException("El cliente no puede ser nulo");
+        }
+        if (client.getClientName() == null || client.getClientName().isBlank()) {
+            throw new IllegalArgumentException("Debe ingresar un nombre válido");
+        }
+
+        if (client.getAddress() == null || client.getAddress().isBlank()) {
+            throw new IllegalArgumentException("Debe ingresar una dirección válida");
+        }
     }
 }

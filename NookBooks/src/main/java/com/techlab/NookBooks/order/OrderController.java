@@ -1,4 +1,4 @@
-package com.techlab.order;
+package com.techlab.NookBooks.order;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -14,18 +14,18 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder (@RequestBody Order order){
-        return this.orderService.createOrder(order);
+    public PurchaseOrder createOrder (@RequestBody PurchaseOrder purchaseOrder){
+        return this.orderService.createOrder(purchaseOrder);
     }
 
     @PostMapping("/line")
-    public OrderLine OrderLine (@RequestBody OrderLine orderLine){
-        return this.orderService.createOrderLine(orderLine);
+    public OrderLine createOrderLine(@RequestBody OrderLineDTO dto){
+        return this.orderService.createOrderLine(dto);
     }
 
     // GET/order?client=234
     @GetMapping
-    public List<Order> showOrders(@RequestParam(required = false, defaultValue = "") Long client){
+    public List<PurchaseOrder> showOrders(@RequestParam(required = false, defaultValue = "") Long client){
         return this.orderService.showOrders(client);
     }
 
@@ -37,7 +37,7 @@ public class OrderController {
 
     // PUT /order/{id}/confirm?client=36
     @PutMapping("/{id}/confirm")
-    public Order confirmOrder(
+    public PurchaseOrder confirmOrder(
             @PathVariable Long id,
             @RequestParam Long client
     ) {
@@ -46,19 +46,19 @@ public class OrderController {
 
     // PUT /order/{id}/send
     @PutMapping("/{id}/send")
-    public Order sendOrder(@PathVariable Long id) {
+    public PurchaseOrder sendOrder(@PathVariable Long id) {
         return orderService.sendOrder(id);
     }
 
     // PUT /order/{id}/deliver
     @PutMapping("/{id}/deliver")
-    public Order deliverOrder(@PathVariable Long id) {
+    public PurchaseOrder deliverOrder(@PathVariable Long id) {
         return orderService.deliverOrder(id);
     }
 
     // DELETE /order/{id}
     @DeleteMapping("/{id}")
-    public Order deleteOrder(@PathVariable Long id) {
+    public PurchaseOrder deleteOrder(@PathVariable Long id) {
         return orderService.deleteOrder(id);
     }
 

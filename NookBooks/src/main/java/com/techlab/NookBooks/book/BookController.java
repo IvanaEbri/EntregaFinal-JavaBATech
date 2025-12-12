@@ -1,4 +1,4 @@
-package com.techlab.book;
+package com.techlab.NookBooks.book;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -18,18 +18,22 @@ public class BookController {
         return this.bookService.createBook(book);
     }
 
-    // GET /book?book="valor_busqueda"
+    // GET /book?search=valor   o   /book?category=5
     @GetMapping
     public List<Book> showBooks(
-            @RequestParam(required = false, defaultValue = "") String searchValue){
-        return this.bookService.showBook(searchValue);
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long category) {
+
+        if (category != null) {
+            return this.bookService.showBookByCategory(category);
+        }
+        // si no se envió search, se usa cadena vacía
+        return this.bookService.showBook(search != null ? search : "");
     }
 
-    // GET /book?category=id
-    @GetMapping
-    public List<Book> showBooks( @RequestParam(required = true, defaultValue = "") Long category){
-        return this.bookService.showBookByCategory(category);
-    }
+    @GetMapping("{bookId}")
+    public Book showBook (@PathVariable Long bookId){ return (Book) this.bookService.searchBook(bookId);}
+
 
     @PutMapping("/{id}")
     public Book editBook(@PathVariable Long id, @RequestBody Book book) {

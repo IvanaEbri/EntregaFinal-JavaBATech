@@ -1,4 +1,4 @@
-package com.techlab.book;
+package com.techlab.NookBooks.book;
 
 import org.springframework.stereotype.Service;
 
@@ -30,6 +30,10 @@ public class CategoryService {
             return this.categoryRepository.findByCategoryNameContaining(category);
         }
         return this.categoryRepository.findAll();
+    }
+
+    public Category searchCategory (Long id){
+        return this.categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
     }
 
     public Category editCategoryName(Long id, Category dataCategory) {
