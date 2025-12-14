@@ -68,4 +68,8 @@ public class OrderLine {
     public void setOrder(PurchaseOrder purchaseOrder) {
         this.purchaseOrder = purchaseOrder;
     }
+
+    public void refreshCost(){
+        setValueLine(getBook().getPrice()*getQuantity());
+    }
 }

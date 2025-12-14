@@ -1,6 +1,7 @@
 package com.techlab.NookBooks.service;
 
 import com.techlab.NookBooks.exception.CheckedDataException;
+import com.techlab.NookBooks.exception.InsufficientStockException;
 import com.techlab.NookBooks.exception.NotFoundException;
 import com.techlab.NookBooks.exception.NullException;
 import com.techlab.NookBooks.model.entity.Book;
@@ -136,13 +137,17 @@ public class BookService {
         return this.bookRepository.save(book);
     }
 
-    public Book removeStock (Long id, Integer quantity) throws NotFoundException {
+    public Book removeStock (Long id, Integer quantity) throws NotFoundException, InsufficientStockException  {
         Optional<Book> bookOptional = this.bookRepository.findById(id);
         if (bookOptional.isEmpty()) {
             throw new NotFoundException("No se encuentra el libro. No se podrá modificar el stock");
         }
 
         Book book = bookOptional.get();
+
+        if (book.getStock()<quantity){
+            throw new InsufficientStockException("No hay stock suficiente para el pedido.");
+        }
         book.setStock(book.getStock()-quantity);
         return this.bookRepository.save(book);
     }

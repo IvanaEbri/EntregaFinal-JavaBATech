@@ -1,9 +1,6 @@
 package com.techlab.NookBooks.controller;
 
-import com.techlab.NookBooks.exception.CheckedDataException;
-import com.techlab.NookBooks.exception.InsufficientStockException;
-import com.techlab.NookBooks.exception.NotFoundException;
-import com.techlab.NookBooks.exception.NullException;
+import com.techlab.NookBooks.exception.*;
 import com.techlab.NookBooks.model.dto.ErrorResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +32,14 @@ public class HandleController {
         response.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
         response.setMessage(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(InvalidEditException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidEditException(NotFoundException e) {
+        ErrorResponseDTO response = new ErrorResponseDTO();
+        response.setTitle(HttpStatus.NOT_ACCEPTABLE.getReasonPhrase());
+        response.setMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(response);
     }
 
     @ExceptionHandler(CheckedDataException.class)

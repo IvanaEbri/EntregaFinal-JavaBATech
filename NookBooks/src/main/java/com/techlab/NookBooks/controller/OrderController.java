@@ -4,6 +4,8 @@ import com.techlab.NookBooks.model.entity.OrderLine;
 import com.techlab.NookBooks.model.entity.PurchaseOrder;
 import com.techlab.NookBooks.model.dto.OrderLineDTO;
 import com.techlab.NookBooks.service.OrderService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,57 +20,61 @@ public class OrderController {
     }
 
     @PostMapping
-    public PurchaseOrder createOrder (@RequestBody PurchaseOrder purchaseOrder){
-        return this.orderService.createOrder(purchaseOrder);
+    public ResponseEntity<PurchaseOrder> createOrder (@RequestBody PurchaseOrder purchaseOrder){
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.orderService.createOrder(purchaseOrder));
     }
 
     @PostMapping("/line")
-    public OrderLine createOrderLine(@RequestBody OrderLineDTO dto){
-        return this.orderService.createOrderLine(dto);
+    public ResponseEntity<OrderLine> createOrderLine(@RequestBody OrderLineDTO dto){
+        return ResponseEntity.status(HttpStatus.CREATED).body(this.orderService.createOrderLine(dto));
+
     }
 
     // GET/order?client=234
     @GetMapping
-    public List<PurchaseOrder> showOrders(@RequestParam(required = false, defaultValue = "") Long client){
-        return this.orderService.showOrders(client);
+    public ResponseEntity<List<PurchaseOrder>> showOrders(@RequestParam(required = false, defaultValue = "") Long client){
+        return ResponseEntity.status(HttpStatus.OK).body(this.orderService.showOrders(client));
     }
 
     // GET /order/{orderId}/lines
     @GetMapping("/{orderId}/lines")
-    public List<OrderLine> showOrderLine (@PathVariable Long orderId){
-        return this.orderService.showOrden(orderId);
+    public ResponseEntity<List<OrderLine>> showOrderLine (@PathVariable Long orderId){
+        return ResponseEntity.status(HttpStatus.OK).body(this.orderService.showOrden(orderId));
+
     }
 
     // PUT /order/{id}/confirm?client=36
     @PutMapping("/{id}/confirm")
-    public PurchaseOrder confirmOrder(
+    public ResponseEntity<PurchaseOrder> confirmOrder(
             @PathVariable Long id,
             @RequestParam Long client
     ) {
-        return orderService.confirmOrder(id, client);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderService.confirmOrder(id, client));
+
     }
 
     // PUT /order/{id}/send
     @PutMapping("/{id}/send")
-    public PurchaseOrder sendOrder(@PathVariable Long id) {
-        return orderService.sendOrder(id);
+    public ResponseEntity<PurchaseOrder> sendOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderService.sendOrder(id));
     }
 
     // PUT /order/{id}/deliver
     @PutMapping("/{id}/deliver")
-    public PurchaseOrder deliverOrder(@PathVariable Long id) {
-        return orderService.deliverOrder(id);
+    public ResponseEntity<PurchaseOrder> deliverOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderService.deliverOrder(id));
+
     }
 
     // DELETE /order/{id}
     @DeleteMapping("/{id}")
-    public PurchaseOrder deleteOrder(@PathVariable Long id) {
-        return orderService.deleteOrder(id);
+    public ResponseEntity<PurchaseOrder> deleteOrder(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.deleteOrder(id));
     }
 
     // DELETE /order/line/{id}
     @DeleteMapping("/line/{id}")
-    public OrderLine deleteOrderLine(@PathVariable Long id) {
-        return orderService.deleteOrderLine(id);
+    public ResponseEntity<OrderLine> deleteOrderLine(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(orderService.deleteOrderLine(id));
     }
 }

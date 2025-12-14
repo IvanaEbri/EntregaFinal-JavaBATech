@@ -1,5 +1,8 @@
 package com.techlab.NookBooks.service;
 
+import com.techlab.NookBooks.exception.CheckedDataException;
+import com.techlab.NookBooks.exception.NotFoundException;
+import com.techlab.NookBooks.exception.NullException;
 import com.techlab.NookBooks.model.entity.Client;
 import com.techlab.NookBooks.repository.ClientRepository;
 import org.springframework.stereotype.Service;
@@ -27,15 +30,15 @@ public class ClientService {
         return this.clientRepository.findByActiveTrue();
     }
 
-    public Client searchClient (Long id){
+    public Client searchClient (Long id) throws NotFoundException {
         return this.clientRepository.findByActiveTrueAndId(id)
-                .orElseThrow(() -> new RuntimeException("No se encontro el cliente"));
+                .orElseThrow(() -> new NotFoundException("No se encontro el cliente"));
     }
 
-    public Client editClient (Long id, Client dataClient){
+    public Client editClient (Long id, Client dataClient) throws NotFoundException{
         validateClient(dataClient);
         Client client = this.clientRepository.findByActiveTrueAndId(id)
-                .orElseThrow(() -> new RuntimeException("No se encontro el cliente"));
+                .orElseThrow(() -> new NotFoundException(   "No se encontro el cliente"));
 
         client.setClientName(dataClient.getClientName());
         client.setAddress(dataClient.getAddress());
@@ -43,12 +46,11 @@ public class ClientService {
         return client;
     }
 
-    public Client deleteClient (Long id){
+    public Client deleteClient (Long id) throws NotFoundException{
         Optional<Client> clientOptional = this.clientRepository.findByActiveTrueAndId(id);
 
         if (clientOptional.isEmpty()){
-            System.out.println("No se puede eliminar el cliente ya que no se encuentra.");
-            return null;
+            throw new NotFoundException("No se puede eliminar el cliente ya que no se ha encontrado.");
         }
 
         Client client = clientOptional.get();
@@ -59,16 +61,16 @@ public class ClientService {
 
 
     // ----- VALIDADOR -----
-    private void validateClient(Client client) {
+    private void validateClient(Client client)throws NullException {
         if (client == null) {
-            throw new IllegalArgumentException("El cliente no puede ser nulo");
+            throw new NullException("El cliente no puede ser nulo");
         }
         if (client.getClientName() == null || client.getClientName().isBlank()) {
-            throw new IllegalArgumentException("Debe ingresar un nombre válido");
+            throw new NullException("Debe ingresar un nombre válido");
         }
 
         if (client.getAddress() == null || client.getAddress().isBlank()) {
-            throw new IllegalArgumentException("Debe ingresar una dirección válida");
+            throw new NullException("Debe ingresar una dirección válida");
         }
     }
 }
