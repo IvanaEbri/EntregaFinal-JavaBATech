@@ -1,5 +1,7 @@
-package com.techlab.NookBooks.book;
+package com.techlab.NookBooks.controller;
 
+import com.techlab.NookBooks.service.CategoryService;
+import com.techlab.NookBooks.model.entity.Category;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

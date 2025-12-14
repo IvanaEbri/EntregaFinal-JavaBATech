@@ -1,5 +1,7 @@
-package com.techlab.NookBooks.client;
+package com.techlab.NookBooks.service;
 
+import com.techlab.NookBooks.model.entity.Client;
+import com.techlab.NookBooks.repository.ClientRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

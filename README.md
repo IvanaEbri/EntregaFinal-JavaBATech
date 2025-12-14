@@ -237,7 +237,6 @@ Incluye claves foráneas y relaciones entre entidades.
 * Spring Data JPA
 * MariaDB
 * Maven
-* Lombok
 * Insomnia para testeo
 
 

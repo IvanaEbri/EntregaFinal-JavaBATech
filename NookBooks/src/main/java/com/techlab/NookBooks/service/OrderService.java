@@ -1,9 +1,12 @@
-package com.techlab.NookBooks.order;
-import com.techlab.NookBooks.book.Book;
-import com.techlab.NookBooks.book.BookService;
-import com.techlab.NookBooks.client.Client;
-import com.techlab.NookBooks.client.ClientService;
+package com.techlab.NookBooks.service;
+import com.techlab.NookBooks.model.dto.OrderLineDTO;
+import com.techlab.NookBooks.model.entity.Book;
+import com.techlab.NookBooks.model.entity.Client;
+import com.techlab.NookBooks.model.entity.OrderLine;
+import com.techlab.NookBooks.model.entity.PurchaseOrder;
 import com.techlab.NookBooks.exception.ExceptionStockInsuficiente;
+import com.techlab.NookBooks.repository.OrderLineRepository;
+import com.techlab.NookBooks.repository.OrderRepository1;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

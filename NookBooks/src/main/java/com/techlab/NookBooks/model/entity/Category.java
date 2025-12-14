@@ -1,4 +1,4 @@
-package com.techlab.NookBooks.book;
+package com.techlab.NookBooks.model.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,4 +1,4 @@
-package com.techlab.NookBooks.order;
+package com.techlab.NookBooks.model.dto;
 
 public class OrderLineDTO {
 

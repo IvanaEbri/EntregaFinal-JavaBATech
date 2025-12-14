@@ -1,6 +1,12 @@
-package com.techlab.NookBooks.book;
+package com.techlab.NookBooks.service;
 
-import com.techlab.NookBooks.client.Client;
+import com.techlab.NookBooks.exception.CheckedDataException;
+import com.techlab.NookBooks.exception.NotFoundException;
+import com.techlab.NookBooks.exception.NullException;
+import com.techlab.NookBooks.model.entity.Book;
+import com.techlab.NookBooks.model.entity.Category;
+import com.techlab.NookBooks.repository.BookRepository;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,30 +26,24 @@ public class BookService {
         this.categoryService = categoryService;
     }
 
-    public Book createBook (Book book){
-        //TODO: verificar campos
-        if (book.getTitle() == null || book.getAuthor() == null || book.getDescription() == null || book.getUrlImage() == null){
-            System.out.println("Debe completar todos los datos.");
-            return null;
+    public  Book createBook (Book book) throws NullException, NotFoundException, CheckedDataException {
+
+        if (isNullOrEmpty(book.getTitle()) || isNullOrEmpty(book.getAuthor()) || isNullOrEmpty(book.getDescription()) || isNullOrEmpty(book.getUrlImage())) {
+            throw new NullException("Debe completar todos los datos.");
         }
-        if (book.getCategory() == null || book.getCategory().getId() == null){
-            System.out.println("Debe seleccionar la categoria del libro.");
-            return null;
+        if (book.getCategory() == null || book.getCategory().getId() == null) {
+            throw new NullException("Debe seleccionar la categoria del libro.");
         }
-        if (book.getPrice() <= 0.00){
-            System.out.println("El precio debe ser un valor mayor a $0,00.");
-            return null;
+        if (book.getPrice() <= 0.00) {
+            throw new CheckedDataException("El precio debe ser un valor mayor a $0,00.");
         }
-        if (book.getStock() < 0){
-            System.out.println("El stock debe ser una cantidad valida.");
-            return null;
+        if (book.getStock() < 0) {
+            throw new CheckedDataException("El stock debe ser una cantidad valida.");
         }
 
         // Buscar categoría gestionada por JPA
-        Category category = categoryService.searchCategory(
-                book.getCategory().getId()
-        );
-        System.out.println("Creando un nuevo producto");
+        Category category = checkCategory(book);
+
         return this.bookRepository.save(book);
     }
     public List<Book> showBook (String book){
@@ -63,7 +63,7 @@ public class BookService {
 
     public Book searchBook (Long id){
         return this.bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontro el libro"));
+                .orElseThrow(() -> new NotFoundException("No se encontró el libro"));
     }
 
     public List<Book> showBookByCategory (Long category){
@@ -73,10 +73,9 @@ public class BookService {
         return this.bookRepository.findAll();
     }
 
-    public Book editBook(Long id, Book dataBook) {
+    public Book editBook(Long id, Book dataBook) throws CheckedDataException, NotFoundException , NullException{
 
-        Book book = bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontró el libro."));
+        Book book = searchBook(id);
 
         // Validaciones
         if (isNullOrEmpty(dataBook.getTitle()) ||
@@ -84,25 +83,23 @@ public class BookService {
                 isNullOrEmpty(dataBook.getDescription()) ||
                 isNullOrEmpty(dataBook.getUrlImage())) {
 
-            throw new IllegalArgumentException("Todos los campos de texto son obligatorios");
+            throw new NullException("Todos los campos de texto son obligatorios");
         }
 
         if (dataBook.getCategory() == null || dataBook.getCategory().getId() == null) {
-            throw new IllegalArgumentException("La categoría es obligatoria");
+            throw new NullException("La categoría es obligatoria");
         }
 
         if (dataBook.getPrice() == null || dataBook.getPrice() <= 0) {
-            throw new IllegalArgumentException("El precio debe ser mayor a 0");
+            throw new CheckedDataException("El precio debe ser mayor a 0");
         }
 
         if (dataBook.getStock() == null || dataBook.getStock() < 0) {
-            throw new IllegalArgumentException("El stock no puede ser negativo");
+            throw new CheckedDataException("El stock no puede ser negativo");
         }
 
         // Buscar categoría gestionada por JPA
-        Category category = categoryService.searchCategory(
-                dataBook.getCategory().getId()
-        );
+        Category category = checkCategory(book);
 
         // Actualizar campos
         book.setTitle(dataBook.getTitle());
@@ -120,52 +117,46 @@ public class BookService {
         return value == null || value.isBlank();
     }
 
-    public Book deleteBook (Long id){
+    private Category checkCategory(Book book) throws NotFoundException{
+        Category category = categoryService.searchCategory(
+                book.getCategory().getId());
+        if (category.getCategoryName().isBlank()){
+            throw new NotFoundException("No se encontró la categoria.");}
+        return category;
+    }
+
+    public Book deleteBook (Long id) throws NotFoundException{
         Optional<Book> bookOptional = this.bookRepository.findById(id);
         if (bookOptional.isEmpty()) {
-            System.out.println("No se puede borrar el libro. No se encontró el mismo");
-            return null;
+            throw new NotFoundException("No se puede borrar el libro. No se encontró el mismo");
         }
 
         Book book = bookOptional.get();
         book.setActive(false);
-
-        this.bookRepository.save(book);
-
-        System.out.println("Se borro correctamente el libro: " + book.getTitle() + " - " + book.getAuthor());
-        return book;
+        return this.bookRepository.save(book);
     }
 
-    public Book removeStock (Long id, Integer quantity){
+    public Book removeStock (Long id, Integer quantity) throws NotFoundException {
         Optional<Book> bookOptional = this.bookRepository.findById(id);
         if (bookOptional.isEmpty()) {
-            System.out.println("No se encuentra el libro. No se podrá modificar el stock");
-            return null;
+            throw new NotFoundException("No se encuentra el libro. No se podrá modificar el stock");
         }
 
         Book book = bookOptional.get();
         book.setStock(book.getStock()-quantity);
-
-        this.bookRepository.save(book);
-
-        System.out.println("Se modificó correctamente el stock del libro: " + book.getTitle() + " - " + book.getAuthor()+ ", stock actual: " +book.getStock());
-        return book;
+        return this.bookRepository.save(book);
     }
 
-    public Book addStock (Long id, Integer quantity){
+    public Book addStock (Long id, Integer quantity) throws     NotFoundException{
         Optional<Book> bookOptional = this.bookRepository.findById(id);
         if (bookOptional.isEmpty()) {
-            System.out.println("No se encuentra el libro. No se podrá modificar el stock");
-            return null;
+            throw new NotFoundException("No se encuentra el libro. No se podrá modificar el stock");
         }
 
         Book book = bookOptional.get();
         book.setStock(book.getStock()+quantity);
 
-        this.bookRepository.save(book);
-
-        System.out.println("Se modificó correctamente el stock del libro: " + book.getTitle() + " - " + book.getAuthor()+ ", stock actual: " +book.getStock());
-        return book;
+        return this.bookRepository.save(book);
     }
 
 }

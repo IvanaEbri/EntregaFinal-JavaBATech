@@ -1,5 +1,6 @@
-package com.techlab.NookBooks.book;
+package com.techlab.NookBooks.repository;
 
+import com.techlab.NookBooks.model.entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

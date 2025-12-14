@@ -1,6 +1,5 @@
-package com.techlab.NookBooks.order;
+package com.techlab.NookBooks.model.entity;
 
-import com.techlab.NookBooks.book.Book;
 import jakarta.persistence.*;
 
 
