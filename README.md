@@ -1,7 +1,7 @@
 # 💻 **Sistema de Gestión de Productos y Pedidos – Proyecto Integrador Back-End Java (BATech)**
 
 Este proyecto implementa un **sistema de e-commerce** desarrollado en **Java**, utilizando **Spring Boot** y **MariaDB** para gestionar productos, pedidos, usuarios y categorías.
-Incluye funcionalidades de catálogo, carrito, pedidos, stock y administración, integrándose con una aplicación de Front-End (HTML/JS).
+Incluye funcionalidades de catálogo, carrito, pedidos, stock y administración.
 
 Es la **entrega final** del curso Back-End en Java y aplica los principales conceptos de:
 
@@ -75,12 +75,12 @@ La API REST permite:
     * cancelado 
 
 ---
-### Ver si se suma
+
 ## 📜 **Historial de Pedidos**
 
 * Listar pedidos por ID de usuario
 * Ver detalle del pedido
-* Ver monto total, fecha y estado
+* Ver monto total y estado
 
 ---
 
@@ -88,8 +88,6 @@ La API REST permite:
 
 * Gestión completa de productos
 * Gestión de stock
-### Ver si se suma
-* Gestión de usuarios (opcional)
 * Configuración técnica del sistema
 
 ---
@@ -98,18 +96,9 @@ La API REST permite:
 
 ### ✔ Programación Orientada a Objetos
 
-* Clases Producto, Pedido, LineaPedido, Usuario, Categoría
+* Clases Product, PurchaseOrder, OrderLine, Client, Category
 * Encapsulamiento y reutilización de código
 * Relaciones uno-a-muchos y muchos-a-muchos
-* Polimorfismo opcional para productos especializados (Bebida, Tecnología, etc.)
-
----
-
-### ✔ Colecciones
-
-* `List<Producto>`
-* `List<LineaPedido>`
-* `Map<Integer,Integer>` para relacionar producto-cantidad (opcional)
 
 ---
 
@@ -122,18 +111,59 @@ controller/
 service/
 repository/
 model/
-dto/
 exception/
 ```
+---
 
-Endpoints principales:
+### ✔ Endpoints:
 
-* `GET /api/productos`
-* `POST /api/productos`
-* `PUT /api/productos/{id}`
-* `DELETE /api/productos/{id}`
-* `POST /api/pedidos`
-* `GET /api/usuarios/{id}/pedidos`
+#### 📦 Orders (Pedidos):
+
+##### 🔹 Pedido
+
+* Crear un nuevo pedido: `POST /api/order`
+* Obtener todos los pedidos: `GET /api/order`
+* Obtener pedidos filtrados por cliente: `GET /api/order?client={clientId}`
+* Eliminar un pedido por ID: `DELETE /api/order/{orderId}`
+
+##### 🔹 Estados del pedido
+
+* Confirmar un pedido: `PUT /api/order/{orderId}/confirm?client={clientId}`
+* Marcar el pedido como enviado: `PUT /api/order/{orderId}/send`
+* Marcar el pedido como entregado: `PUT /api/order/{orderId}/deliver`
+
+##### 🔹 Líneas de pedido (OrderLine)
+
+* Agregar una línea de pedido (libro + cantidad): `POST /api/order/line`
+* Obtener las líneas asociadas a un pedido: `GET /api/order/{orderId}/lines`
+* Eliminar una línea de pedido: `DELETE /api/order/line/{lineId}`
+
+#### 📚 Books (Libros)
+
+* Crear un nuevo libro: `POST /api/book`
+* Obtener todos los libros:`GET /api/book`
+* Obtener un libro por ID: `GET /api/book/{bookId}`
+* Actualizar un libro existente: `PUT /api/book/{bookId}`
+* Eliminar un libro: `DELETE /api/book/{bookId}`
+
+##### 🔹 Búsquedas de libros
+
+* Buscar libros por título, autor o categoría: `GET /api/book?search={texto}`
+* Buscar libros por categoría: `GET /api/book?category={categoryId}`
+
+#### 🗂️ Categories (Categorías)
+* Crear una nueva categoría:`POST /api/category` 
+* Buscar categoría por nombre:`GET /api/category?category={name}`
+* Obtener todas las categorías: `GET /api/category`
+* Actualizar una categoría: `PUT /api/category/{categoryId}`
+
+#### 👤 Clients (Clientes)
+* Crear un cliente: `POST /api/client`
+* Obtener todos los clientes:`GET /api/client`
+* Obtener un cliente por ID: `GET /api/client/{clientId}`
+* Buscar cliente por nombre: `GET /api/client?clientName={name}`
+* Actualizar datos de un cliente: `PUT /api/client/{clientId}`
+* Eliminar un cliente: `DELETE /api/client/{clientId}`
 
 ---
 
@@ -141,6 +171,7 @@ Endpoints principales:
 
 Incluye:
 
+//TODO: revisar excepciones 
 * `StockInsuficienteException`
 * `ProductoNoEncontradoException`
 * Manejo centralizado con `@ControllerAdvice`
@@ -151,21 +182,20 @@ Incluye:
 
 * Entities
 * Repositorios `JpaRepository`
-* Relaciones @OneToMany, @ManyToOne, @ManyToMany
-* Validaciones con `@NotNull`, `@Min`, etc.
+* Relaciones `@OneToMany`, `@ManyToOne`, `@ManyToMany`
 
 ---
 
 # ⚙️ **Flujo de Uso del Sistema (Resumen)**
 
 1️⃣ El usuario ingresa al sitio web
-→ Frontend hace `GET /api/productos`
+→ Frontend hace `GET /api/book`
 → Se muestran los productos
 
 2️⃣ Agregar un producto
 → Formulario HTML
-→ POST `/api/productos` con JSON
-→ El backend valida y guarda
+→ POST `/api/book` con JSON
+→ El backend valída y guarda
 
 3️⃣ Carrito
 → El usuario selecciona productos
@@ -173,46 +203,27 @@ Incluye:
 → Se genera el total
 
 4️⃣ Crear pedido
-→ POST `/api/pedidos`
+→ POST `/api/order`
 → Se descuenta stock
 → Pedido queda en estado "pendiente"
 
 5️⃣ Listar pedidos
-→ `GET /api/usuarios/{id}/pedidos`
+→ `GET /api/order?client={clientId}`
 → Se muestra historial y estados
-
----
-
-# 🧩 **Estructura del Proyecto**
-
-```
-src/
- ├── main/
- │   ├── java/
- │   │   └── com.techlab.ecommerce/
- │   │        ├── controller/
- │   │        ├── service/
- │   │        ├── repository/
- │   │        ├── model/
- │   │        ├── dto/
- │   │        └── exception/
- │   └── resources/
- │       ├── application.properties
- │       └── schema.sql (opcional)
- └── test/
-```
 
 ---
 
 # 🗄️ **Base de Datos**
 
+**La base de datos se encuentra corriendo en el puerto 3310**
+
 Tablas principales:
 
-* productos
-* categorias
-* usuarios
-* pedidos
-* lineas_pedido
+* book
+* category
+* client
+* purchase_order
+* order_line
 
 Incluye claves foráneas y relaciones entre entidades.
 
@@ -227,9 +238,7 @@ Incluye claves foráneas y relaciones entre entidades.
 * MariaDB
 * Maven
 * Lombok
-* Postman para testeo
-### Ver si se suma
-* (Opcional) Spring Security para autenticación
+* Insomnia para testeo
 
 
 
