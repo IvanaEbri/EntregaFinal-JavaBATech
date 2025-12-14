@@ -1,5 +1,6 @@
 package com.techlab.NookBooks.controller;
 
+import com.techlab.NookBooks.model.entity.Book;
 import com.techlab.NookBooks.model.entity.OrderLine;
 import com.techlab.NookBooks.model.entity.PurchaseOrder;
 import com.techlab.NookBooks.model.dto.OrderLineDTO;
@@ -64,6 +65,12 @@ public class OrderController {
     public ResponseEntity<PurchaseOrder> deliverOrder(@PathVariable Long id) {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderService.deliverOrder(id));
 
+    }
+
+    // PUT /order/line/{id}
+    @PutMapping("/line/{id}")
+    public ResponseEntity<OrderLine> deleteOrderLine(@PathVariable Long id, @RequestBody OrderLine orderLine) {
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(orderService.editOrderLine(id,orderLine));
     }
 
     // DELETE /order/{id}
