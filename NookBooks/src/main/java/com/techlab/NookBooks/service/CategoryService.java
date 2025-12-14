@@ -1,5 +1,8 @@
 package com.techlab.NookBooks.service;
 
+import com.techlab.NookBooks.exception.CheckedDataException;
+import com.techlab.NookBooks.exception.NotFoundException;
+import com.techlab.NookBooks.exception.NullException;
 import com.techlab.NookBooks.model.entity.Category;
 import com.techlab.NookBooks.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -17,12 +20,10 @@ public class CategoryService {
         this.categoryRepository = repository;
     }
 
-    public Category createCategory(Category category) {
+    public Category createCategory(Category category)throws NullException {
         if (category.getCategoryName() == null) {
-            System.out.println("Ingrese un nombre valido para crear la categoria.");
-            return null;
+            throw new NullException("Ingrese un nombre valido para crear la categoria.");
         }
-        System.out.println("Creando nueva categoria");
 
         return this.categoryRepository.save(category);
     }
@@ -34,19 +35,18 @@ public class CategoryService {
         return this.categoryRepository.findAll();
     }
 
-    public Category searchCategory (Long id){
-        return this.categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+    public Category searchCategory (Long id) throws NotFoundException {
+        return this.categoryRepository.findById(id).orElseThrow(() -> new NotFoundException("Categoría no encontrada."));
     }
 
-    public Category editCategoryName(Long id, Category dataCategory) {
+    public Category editCategoryName(Long id, Category dataCategory) throws  NotFoundException, CheckedDataException {
         // TODO: https://www.baeldung.com/java-optional-return
         Category category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontro la categoria"));
+                .orElseThrow(() -> new NotFoundException("No se encontró la categoria"));
 
         // VALIDACIONES
         if (dataCategory.getCategoryName() == null) {
-            System.out.println("No se puede editar la Categoria. Ingrese un nombre valido.");
-            return null;
+            throw new CheckedDataException("No se puede editar la Categoria. Ingrese un nombre valido.");
         }
 
         category.setCategoryName(dataCategory.getCategoryName());
@@ -58,8 +58,7 @@ public class CategoryService {
     public Category deleteCategory(Long id) {
         Optional<Category> categoryOptional = this.categoryRepository.findById(id);
         if (categoryOptional.isEmpty()) {
-            System.out.println("No se puede borrar la categoria. No se encontró la misma");
-            return null;
+            throw new NotFoundException("No se puede borrar la categoria. No se encontró la misma.");
         }
 
         Category category = categoryOptional.get();
@@ -67,8 +66,6 @@ public class CategoryService {
         this.categoryRepository.delete(category);
         // se puede usar el siguiente codigo, pero hay que manejar una excepcion(OptimisticLockingFailureException)
         //this.repository.deleteById(category);
-
-        System.out.println("Se borro correctamente el categoria: " + category.getCategoryName());
         return category;
     }
 }

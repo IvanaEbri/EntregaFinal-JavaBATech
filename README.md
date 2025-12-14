@@ -213,6 +213,27 @@ Incluye:
 
 ---
 
+# 🧩 **Estructura del Proyecto**
+
+```
+src/
+ ├── main/
+ │   ├── java/
+ │   │   └── com.techlab.ecommerce/
+ │   │        ├── controller/
+ │   │        ├── service/
+ │   │        ├── repository/
+ │   │        ├── model/
+ │   │        │   ├── dto/
+ │   │        │   └──entity/
+ │   │        └── exception/
+ │   └── resources/
+ │       └── application.properties
+ └── test/
+```
+
+---
+
 # 🗄️ **Base de Datos**
 
 **La base de datos se encuentra corriendo en el puerto 3310**
